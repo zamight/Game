@@ -9,9 +9,9 @@ public class GameSpriteImage {
     int x, y;
     public int x2 = 0;
     public int y2 = 0;
-    int width, height;
-    int frameX, frameY;
-    Image image;
+    public int width, height;
+    public int frameX, frameY;
+    public Image image;
 
     public GameSpriteImage(Image image, int x, int y, int width, int height) {
         this.x = x;

@@ -12,18 +12,39 @@ public class GameDisplay extends JPanel {
     public CopyOnWriteArrayList<GameString> listGameString = new CopyOnWriteArrayList<GameString>();
     public CopyOnWriteArrayList<GameImage> listGameImage = new CopyOnWriteArrayList<GameImage>();
     public CopyOnWriteArrayList<GameRectangle> listGameRectangle = new CopyOnWriteArrayList<GameRectangle>();
-    public CopyOnWriteArrayList<GamePlayer> listGameSpriteImage = new CopyOnWriteArrayList<GamePlayer>();
+    public CopyOnWriteArrayList<GameSpriteImage> listGameSpriteImage = new CopyOnWriteArrayList<GameSpriteImage>();
+
+    public GameTerrain gameTerrain;
 
     public Iterator<GameString> iterGameString;
     public Iterator<GameImage> iterGameImage;
     public Iterator<GameRectangle> iterGameRectnagle;
-    public Iterator<GamePlayer> iterGameGameSpriteImage;
+    public Iterator<GameSpriteImage> iterGameGameSpriteImage;
 
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         setBackground(new Color(147, 211, 88));
+
+        int terrainX = 0;
+        int terrainY = 0;
+        //Game Terrain Draw
+        if(gameTerrain != null) {
+            for (int[] s : gameTerrain.arrayItems) {
+                for (int terrainValue : s) {
+                    g.drawImage(gameTerrain.gameSpriteImage.image, gameTerrain.getWidth() * terrainX, gameTerrain.getHeight() * terrainY,
+                            (gameTerrain.getWidth() * terrainX) + gameTerrain.getWidth(), (gameTerrain.getHeight() * terrainY) + gameTerrain.getHeight(),
+                            gameTerrain.pointX[terrainValue], gameTerrain.pointY[terrainValue],
+                            gameTerrain.pointX[terrainValue] + gameTerrain.getWidth(), gameTerrain.pointY[terrainValue] + gameTerrain.getHeight(), null);
+                    ++terrainX;
+                }
+                terrainX = 0;
+                ++terrainY;
+            }
+            terrainY = 0;
+        }
+
         iterGameImage = listGameImage.iterator();
         GameImage gameImage;
         while (iterGameImage.hasNext()) {
@@ -38,17 +59,16 @@ public class GameDisplay extends JPanel {
             gameString = iterGameString.next();
             g.setColor(gameString.color);
             g.drawString(gameString.s, gameString.x, gameString.y);
-            g.setColor(Color.GRAY);
         }
 
         iterGameGameSpriteImage = listGameSpriteImage.iterator();
-        GamePlayer gameSpriteImage;
+        GameSpriteImage gameSpriteImage;
         while (iterGameGameSpriteImage.hasNext()) {
             gameSpriteImage = iterGameGameSpriteImage.next();
-            g.drawImage(gameSpriteImage.gameSpriteImage.image, gameSpriteImage.x, gameSpriteImage.y, gameSpriteImage.x + gameSpriteImage.gameSpriteImage.width,
-                    gameSpriteImage.y + gameSpriteImage.gameSpriteImage.height, gameSpriteImage.gameSpriteImage.frameX, gameSpriteImage.gameSpriteImage.frameY,
-                    gameSpriteImage.gameSpriteImage.frameX
-                            + gameSpriteImage.gameSpriteImage.width, gameSpriteImage.gameSpriteImage.frameY + gameSpriteImage.gameSpriteImage.height, this);
+            g.drawImage(gameSpriteImage.image, gameSpriteImage.x, gameSpriteImage.y, gameSpriteImage.x + gameSpriteImage.width,
+                    gameSpriteImage.y + gameSpriteImage.height, gameSpriteImage.frameX, gameSpriteImage.frameY,
+                    gameSpriteImage.frameX
+                            + gameSpriteImage.width, gameSpriteImage.frameY + gameSpriteImage.height, this);
         }
 
         iterGameRectnagle = listGameRectangle.iterator();
@@ -65,6 +85,10 @@ public class GameDisplay extends JPanel {
         listGameRectangle.clear();
     }
 
+    public void linkTerrain(GameTerrain gameTerrain) {
+        this.gameTerrain = gameTerrain;
+    }
+
     public void drawString(String s, int x, int y, Color color) {
         listGameString.add(new GameString(s, x, y, color));
     }
@@ -77,7 +101,7 @@ public class GameDisplay extends JPanel {
         listGameRectangle.add(gameRectangle);
     }
 
-    public void drawImagePortion(GamePlayer gameSpriteImage) {
+    public void drawImagePortion(GameSpriteImage gameSpriteImage) {
         listGameSpriteImage.add(gameSpriteImage);
     }
 }

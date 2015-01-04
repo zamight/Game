@@ -23,11 +23,9 @@ public class GameMouse implements MouseListener, MouseMotionListener {
     @Override
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON1){
-            idX = e.getX() / 25;
-            idY = e.getY() / 25;
+            idX = e.getX() / 16;
+            idY = e.getY() / 16;
             gameTerrain.setItem(idX, idY);
-            System.out.println("x: " + idX);
-            System.out.println("y: " + idY);
         }
     }
 
@@ -53,7 +51,7 @@ public class GameMouse implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        idX = e.getX() / 25;
-        idY = e.getY() / 25;
+        idX = e.getX() / 16;
+        idY = e.getY() / 16;
     }
 }

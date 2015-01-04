@@ -3,7 +3,7 @@
  */
 public class GameAI extends GamePlayer {
     public GameAI(GameSpriteImage gameSpriteImage, int x, int y) {
-        super(gameSpriteImage, x, y);
+        super(99, gameSpriteImage, x, y, "John");
     }
 
 }

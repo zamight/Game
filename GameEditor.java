@@ -7,18 +7,18 @@ public class GameEditor {
 
     public GameEditor(GameMouse gameMouse) {
         this.gameMouse = gameMouse;
-        gameRectangle = new GameRectangle(0, 0, 25, 25, new Color(255,0,0));
+        gameRectangle = new GameRectangle(0, 0, 16, 16, new Color(255,0,0));
     }
 
     public GameRectangle gameRectangle() {
-        gameRectangle.setX(gameMouse.idX * 25);
-        gameRectangle.setY(gameMouse.idY * 25);
+        gameRectangle.setX(gameMouse.idX * 16);
+        gameRectangle.setY(gameMouse.idY * 16);
         return gameRectangle;
     }
 
     public void resetGameRectanglePosition() {
-        gameRectangle.setX(gameMouse.idX * 25);
-        gameRectangle.setY(gameMouse.idY * 25);
+        gameRectangle.setX(gameMouse.idX * 16);
+        gameRectangle.setY(gameMouse.idY * 16);
     }
 
 }

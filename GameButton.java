@@ -6,10 +6,12 @@ import java.awt.event.KeyListener;
  */
 public class GameButton implements KeyListener {
 
-    public GamePlayer gamePlayer;
+    public GameCollision gameCollision;
+    private MainGame mainGame;
 
-    public GameButton(GamePlayer gamePlayer) {
-        this.gamePlayer = gamePlayer;
+    public GameButton(GameCollision gameCollision, MainGame mainGame) {
+        this.gameCollision = gameCollision;
+        this.mainGame = mainGame;
     }
 
     @Override
@@ -19,25 +21,23 @@ public class GameButton implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-            gamePlayer.moveLeft();
-        }
-        else {
-            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                gamePlayer.moveRight();
-            }
-            else {
-
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-
-                    gamePlayer.moveUp();
-                }
-                else {
-                    if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                        gamePlayer.moveDown();
-                    }
-                }
-            }
+        switch(e.getKeyCode()) {
+            case KeyEvent.VK_LEFT :
+                mainGame.gameClientSocket.iMessage("Key:Left");
+                break;
+            case KeyEvent.VK_RIGHT :
+                mainGame.gameClientSocket.iMessage("Key:Right");
+                break;
+            case KeyEvent.VK_UP :
+                mainGame.gameClientSocket.iMessage("Key:Up");
+                break;
+            case KeyEvent.VK_DOWN :
+                mainGame.gameClientSocket.iMessage("Key:Down");
+                break;
+            case KeyEvent.VK_L :
+                mainGame.gameClientSocket.iMessage("You Pressed Left!");
+                System.out.println("??????????????????????");
+                break;
         }
     }
 

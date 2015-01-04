@@ -4,48 +4,58 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MainGame extends JFrame implements Runnable {
 
     public GameDisplay gameDisplay = new GameDisplay();
     public Thread thread;
     public GameImageLoader gameImageLoader = new GameImageLoader();
-    public GamePlayer gamePlayer;
+    public CopyOnWriteArrayList<GamePlayer> gamePlayer = new CopyOnWriteArrayList<GamePlayer>();
     public GameCollision gameCollision;
     public GameTerrain gameTerrain;
     public GameEditor gameEditor;
     public GameMouse gameMouse;
     public GameSpriteImage gamePlayerSpriteImage;
     public GameImage gameImageTree;
+    public GameImage gameCrownAdmin;
     public GameSave gameSave = new GameSave();
+    public GameClientSocket gameClientSocket;
+    public Iterator<GamePlayer> iterGamePlayer;
+    public Color textColor = new Color(0,0,255);
 
-    public MainGame(String title){
+    public MainGame(String title, GameClientSocket gameSocket){
+
+        gameClientSocket = gameSocket;
 
         gameCollision = new GameCollision();
 
-        gamePlayerSpriteImage = new GameSpriteImage(gameImageLoader.Loader("playerLayout"), 50, 70, 16, 18);
+        gamePlayerSpriteImage = new GameSpriteImage(gameImageLoader.Loader("playerLayout"), 100, 70, 16, 18);
 
         //Images
-        gamePlayer = new GamePlayer(gamePlayerSpriteImage, 0, 0);
+        //gamePlayer = new GamePlayer(gamePlayerSpriteImage, 0, 0);
+        //gameCrownAdmin = new GameImage(gameImageLoader.Loader("zamCrown"), 0, 0);
 
         //Terrain
-        Image imageDirt1 = gameImageLoader.Loader("dirtRoad");
-        Image imageDirt2 = gameImageLoader.Loader("sideDirtWalk");
-        Image imageDirt3 = gameImageLoader.Loader("dirt");
+        final GameSpriteImage mapTile = new GameSpriteImage(gameImageLoader.Loader("maptile"), 0, 0, 16, 16);
 
         gameImageTree = new GameImage(gameImageLoader.Loader("tree"), 50, 50);
         GameOpen gameOpen = new GameOpen();
 
         gameTerrain = new GameTerrain();
         gameTerrain.setTerrain(gameOpen.openTerrain("terrain_1"));
-        gameTerrain.loadRoad(imageDirt1, imageDirt2, imageDirt3);
+        gameTerrain.loadImagePallet(mapTile);
         //End Terrain
         gameMouse = new GameMouse(gameTerrain);
         gameEditor = new GameEditor(gameMouse);
 
+        gameDisplay.linkTerrain(gameTerrain);
+        gameCollision.linkGameTerrain(gameTerrain);
+
 
         gameDisplay.addMouseListener(gameMouse);
-        gameDisplay.addKeyListener(new GameButton(gamePlayer));
+        gameDisplay.addKeyListener(new GameButton(gameCollision, this));
         gameDisplay.addMouseMotionListener(gameMouse);
 
         gameDisplay.setFocusable(true);
@@ -57,6 +67,7 @@ public class MainGame extends JFrame implements Runnable {
                 JMenuItem jMenuItemTerrainChangePathSideDirt = new JMenuItem("Change To Side Dirt");
                 JMenuItem jMenuItemTerrainChangePathUpDirt = new JMenuItem("Change To Up Dirt");
                 JMenuItem jMenuItemTerrainChangeGrass = new JMenuItem("Change To Grass");
+        JMenuItem jMenuItemTerrainChangeExtended = new JMenuItem("Extended");
 
 
         jMenuItemTerrainChangePathDirt.addActionListener(new ActionListener() {
@@ -83,11 +94,27 @@ public class MainGame extends JFrame implements Runnable {
                 gameTerrain.setTerrainID(0);
             }
         });
+        jMenuItemTerrainChangeExtended.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //TODO: get rid of this!
+                JFrame gameTileSelector = new JFrame();
+                GameTileSelector gameTile = new GameTileSelector(mapTile.image, gameTerrain);
+                gameTileSelector.add(gameTile);
+                gameTileSelector.setSize(225,225);
+                gameTileSelector.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                gameTileSelector.setTitle("Tile Selector");
+                gameTileSelector.setLocationRelativeTo(null);
+                gameTileSelector.setVisible(true);
+                gameTile.setFocusable(true);
+            }
+        });
 
         jMenuTerrain.add(jMenuItemTerrainChangePathDirt);
         jMenuTerrain.add(jMenuItemTerrainChangePathSideDirt);
         jMenuTerrain.add(jMenuItemTerrainChangePathUpDirt);
         jMenuTerrain.add(jMenuItemTerrainChangeGrass);
+        jMenuTerrain.add(jMenuItemTerrainChangeExtended);
 
         JMenu jMenuPlayer = new JMenu("Player");
         JMenuItem jMenuItemChangePlayer1 = new JMenuItem("Player 1");
@@ -155,22 +182,25 @@ public class MainGame extends JFrame implements Runnable {
         setVisible(true);
         thread = new Thread(this, "Game");
         thread.start();
-    }
 
-    public static void main(String[] args){
-        new MainGame("Gayyy");
+       gameCollision.addCollision(3);
+        gameCollision.addCollision(4);
+        gameCollision.addCollision(5);
+        gameCollision.addCollision(6);
     }
 
     @Override
     public void run() {
 
-        int i = 0;
-
         long lastLoopTime = System.nanoTime();
         final int TARGET_FPS = 50;
         final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
-        int terrainX = 0;
-        int terrainY = 0;
+
+        GameRectangle gameRectangle1 = new GameRectangle(48, 0, 16, 16, new Color(255,0,0));
+        GameRectangle gameRectangle2 = new GameRectangle(64, 0, 16, 16, new Color(255,0,0));
+        GameRectangle gameRectangle3 = new GameRectangle(80, 0, 16, 16, new Color(255,0,0));
+        GameRectangle gameRectangle4 = new GameRectangle(96, 0, 16, 16, new Color(255,0,0));
+
 
         while(true){
 
@@ -183,35 +213,24 @@ public class MainGame extends JFrame implements Runnable {
             try{
                 Thread.sleep( (lastLoopTime-System.nanoTime() + OPTIMAL_TIME)/1000000 );
 
-                //Game Terrain Draw
-                for (int[] s : gameTerrain.arrayItems) {
-                    for(int terrainValue : s) {
-                        if(terrainValue == 1) {
-                            gameDisplay.drawImage(gameTerrain.imageUpDirt, gameTerrain.getWidth() * terrainX, gameTerrain.getHeight() * terrainY);
-                        }
-                        if(terrainValue == 2) {
-                            gameDisplay.drawImage(gameTerrain.imageSideDirt, gameTerrain.getWidth() * terrainX, gameTerrain.getHeight() * terrainY);
-                        }
-                        if(terrainValue == 3) {
-                            gameDisplay.drawImage(gameTerrain.imageDirt, gameTerrain.getWidth() * terrainX, gameTerrain.getHeight() * terrainY);
-                        }
-                        ++terrainX;
-                    }
-                    terrainX = 0;
-                    ++terrainY;
-                }
-                terrainY = 0;
-
-                gameDisplay.drawString(fps + "", 10, 10, new Color(0,0,255));
+                gameDisplay.drawString(fps + "", 10, 10, textColor);
                 gameDisplay.drawRectangle(gameEditor.gameRectangle());
-                gameDisplay.drawImagePortion(gamePlayer);
 
-                gameDisplay.drawImage(gameImageTree.getImage(), gameImageTree.getX(), gameImageTree.getY());
-                gameCollision.addCollision(gamePlayer, gameImageTree);
+                gameDisplay.drawRectangle(gameRectangle1);
+                gameDisplay.drawRectangle(gameRectangle2);
+                gameDisplay.drawRectangle(gameRectangle3);
+                gameDisplay.drawRectangle(gameRectangle4);
+
+                iterGamePlayer = gamePlayer.iterator();
+                GamePlayer gamePlayerWhile;
+                while (iterGamePlayer.hasNext()) {
+                    gamePlayerWhile = iterGamePlayer.next();
+                    gameDisplay.drawImagePortion(gamePlayerWhile.gameSpriteImage);
+                    gameDisplay.drawString(gamePlayerWhile.getName(), gamePlayerWhile.gameSpriteImage.x+16, gamePlayerWhile.gameSpriteImage.y, textColor);
+                }
 
                 gameDisplay.repaint();
-
-                i++;
+                gameDisplay.setDoubleBuffered(true);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
